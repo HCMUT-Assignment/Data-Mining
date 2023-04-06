@@ -6,30 +6,11 @@ from configs.config import *
 import pytorch_lightning as pl
 import torch
 from tqdm import tqdm
-import torch.nn.functional as F
+
 
 TSCONFIG        =   TSConfig()
 MODEL_CONFIG    =   ModelConfig()
 DEVICE          =   torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-
-def training_loop(model, dataloader, val_loader, n_iters, optimizer):
-
-    optimzier = torch.optim.RMSprop(model.parameters(), lr : float = 1e-3)
-    pbar = tqdm(range(0, n_iters)) 
-
-    for idx in pbar:
-
-        batch = next(iter(dataloader))
-        data, target =  batch
-        
-        output = model(data)
-        loss   = F.mse_loss(output, target)
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
 
 def main():
     #   Read the csv file
@@ -60,8 +41,8 @@ def main():
 
 
     #   Train model
-    trainer             =   pl.Trainer(accelerator = 'gpu', max_epochs=100)
-    trainer.fit(model, train_loader, val_loader)
+    trainer             =   pl.Trainer(accelerator = 'gpu', max_epochs=10)
+    trainer.fit(model, train_loader, val_loader) 
 
     #   Save model
 

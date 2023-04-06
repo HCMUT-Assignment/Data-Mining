@@ -5,7 +5,9 @@ import numpy as np
 import pytorch_lightning as pl
 import math
 from einops import rearrange
+from torch.utils.tensorboard import SummaryWriter
 
+logger = SummaryWriter()
 class SinusoidalPosEmb(nn.Module):
     def __init__(self, dim):
         super().__init__()
@@ -73,14 +75,16 @@ class TSModel(pl.LightningModule):
         x, y = train_batch
         out = self.forward(x, None)
         loss = F.mse_loss(out, y) 
+        # print(f'Loss = {loss}')
         self.log('train_loss', loss, on_epoch=True)
+        logger.add_scalar('loss/train', loss, batch_idx)
         return loss
 
     # def validation_step(self, *args, **kwargs):
     #     pass
 
-    def backward(self, trainer, loss, optimizer, optimizer_idx):
-        loss.backward()
+    # def backward(self, trainer, loss, optimizer, optimizer_idx):
+    #     loss.backward()
     
-    def optimizer_step(self, epoch, batch_idx, optimizer, optimizer_idx):
-        optimizer.step()
+    # def optimizer_step(self, epoch, batch_idx, optimizer, optimizer_idx):
+    #     optimizer.step()
