@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-import pytorch_lightning as pl
+# import pytorch_lightning as pl
 import math
 from einops import rearrange
 from torch.utils.tensorboard import SummaryWriter
@@ -22,14 +22,15 @@ class SinusoidalPosEmb(nn.Module):
         emb = torch.cat((emb.sin(), emb.cos()), dim=-1)
         return emb
 
-class TSModel(pl.LightningModule):
+# class TSModel(pl.LightningModule):
+class TSModel(nn.Module):
 
     def __init__(self, n_steps, n_features: int, n_classes: int, n_hidden: int, bidirection: bool = True, 
                 batch_first: bool = True, num_layers: int = 1, lr: float = 1e-3):
         super().__init__()
         self.lstm               =   nn.LSTM(input_size = n_features, hidden_size = n_hidden, 
                                             num_layers = num_layers, batch_first = batch_first, bidirectional= bidirection)
-        self.dropout            =   nn.Dropout(p = 0.5)
+        self.dropout            =   nn.Dropout(p = 0.7)
         self.lr                 =   lr  
         self.hidden_size        =   n_hidden
         self.n_layers           =   num_layers
@@ -53,32 +54,35 @@ class TSModel(pl.LightningModule):
             nn.Linear(32, n_classes)
         )
 
-    def forward(self, x, t):
+    def forward(self, x, t = None):
         D               = 2 if self.bidirection else 1
         hidden_state    = torch.randn(D * self.n_layers, x.shape[0], self.hidden_size, device=x.device)
         cell_state      = torch.randn(D * self.n_layers, x.shape[0], self.hidden_size, device = x.device)
         self.hidden     = (hidden_state, cell_state)
 
-        if t is not None:
-            time_embed = self.time_mlp(t)
+        
  
         out, (h,c) = self.lstm(x, self.hidden)
         out             = rearrange(out, 'b s f -> b (s f)')
         out             = self.mlp(out)
+        
+        if t is not None:
+            time_embed = self.time_mlp(t)
+            out       += time_embed
         return out
 
-    def configure_optimizers(self):
-        optimizer = torch.optim.RMSprop(self.parameters(), lr = 1e-3)
-        return optimizer
+    # def configure_optimizers(self):
+    #     optimizer = torch.optim.Adam(self.parameters(), lr = 1e-3)
+    #     return optimizer
     
-    def training_step(self, train_batch, batch_idx):
-        x, y = train_batch
-        out = self.forward(x, None)
-        loss = F.mse_loss(out, y) 
-        # print(f'Loss = {loss}')
-        self.log('train_loss', loss, on_epoch=True)
-        logger.add_scalar('loss/train', loss, batch_idx)
-        return loss
+    # def training_step(self, train_batch):
+    #     x, y = train_batch
+    #     out = self.forward(x, None)
+    #     loss = F.mse_loss(out, y) 
+    #     # print(f'Loss = {loss}')
+    #     self.log('train_loss', loss, on_epoch=True)
+    #     logger.add_scalar('loss/train1', loss, batch_idx)
+    #     return loss
 
     # def validation_step(self, *args, **kwargs):
     #     pass
