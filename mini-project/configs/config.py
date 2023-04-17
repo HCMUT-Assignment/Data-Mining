@@ -39,11 +39,11 @@ class TSConfig:
     n_classes       =   len(pred_features)
     n_features      =   len(train_features)
     path_csv        =   BASEDIR / 'data_preprocess.csv'
-    batch_size      =   128
+    batch_size      =   512
 @dataclass
 class ModelConfig:
 
     bidirection     =   True
     batch_first     =   True
-    num_layers      =   1
-    lr              = 1e-3
+    num_layers      =   2
+    lr              =   1e-3

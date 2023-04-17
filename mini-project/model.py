@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-# import pytorch_lightning as pl
+import pytorch_lightning as pl
 import math
 from einops import rearrange
 from torch.utils.tensorboard import SummaryWriter
@@ -25,12 +25,12 @@ class SinusoidalPosEmb(nn.Module):
 # class TSModel(pl.LightningModule):
 class TSModel(nn.Module):
 
-    def __init__(self, n_steps, n_features: int, n_classes: int, n_hidden: int, bidirection: bool = True, 
+    def __init__(self, n_steps, n_features: int, n_classes: int, n_hidden: int, bidirection: bool = False, 
                 batch_first: bool = True, num_layers: int = 1, lr: float = 1e-3):
         super().__init__()
         self.lstm               =   nn.LSTM(input_size = n_features, hidden_size = n_hidden, 
                                             num_layers = num_layers, batch_first = batch_first, bidirectional= bidirection)
-        self.dropout            =   nn.Dropout(p = 0.7)
+        self.dropout            =   nn.Dropout(p = 0.5)
         self.lr                 =   lr  
         self.hidden_size        =   n_hidden
         self.n_layers           =   num_layers
@@ -46,12 +46,8 @@ class TSModel(nn.Module):
         # )
 
         self.mlp                =   nn.Sequential(
-            nn.Linear(n_steps * D * n_features, 64),
-            nn.ReLU(),
-            nn.Dropout(0.5),
-            nn.Linear(64, 32),
-            nn.ReLU(),
-            nn.Linear(32, n_classes)
+            
+            nn.Linear(n_steps * D * n_features, 5),
         )
 
     def forward(self, x, t = None):
@@ -75,17 +71,19 @@ class TSModel(nn.Module):
     #     optimizer = torch.optim.Adam(self.parameters(), lr = 1e-3)
     #     return optimizer
     
-    # def training_step(self, train_batch):
+    # def training_step(self, train_batch, batch_idx):
     #     x, y = train_batch
     #     out = self.forward(x, None)
     #     loss = F.mse_loss(out, y) 
     #     # print(f'Loss = {loss}')
     #     self.log('train_loss', loss, on_epoch=True)
-    #     logger.add_scalar('loss/train1', loss, batch_idx)
     #     return loss
 
-    # def validation_step(self, *args, **kwargs):
-    #     pass
+    # def validation_step(self, batch, batch_idx):
+    #     x, y = batch
+    #     out = self.forward(x)
+    #     val_loss = F.mse_loss(out, y)
+    #     self.log('val_loss', val_loss)
 
     # def backward(self, trainer, loss, optimizer, optimizer_idx):
     #     loss.backward()
