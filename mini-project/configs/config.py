@@ -9,8 +9,6 @@ class TSConfig:
     train_features  = [
         'high',
         'low',
-        'MA',
-        'MACD',
         'open',
         'close',
         'Volume',
@@ -23,10 +21,10 @@ class TSConfig:
     pred_features   = [
         'high',
         'low',
-        'MA',
+        # 'MA',
         # 'MACD',
-        'open',
-        'close',
+        # 'open',
+        # 'close',
         # 'Volume',
         # 'Volume MA',
         # 'MA',
