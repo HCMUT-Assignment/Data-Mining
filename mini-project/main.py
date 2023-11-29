@@ -8,6 +8,7 @@ import torch
 import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 # from sklearn.preprocessing import MinMaxScaler
+
 from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
@@ -103,6 +104,7 @@ def main(is_eval: bool):
 
     #   Save model
 
+#Evaluation
 def eval(model, x_test, y_test, ts_config, target_scale):
     print(f'X test shape = {x_test.shape}\nY test shape = {y_test.shape}')
     model.eval()
